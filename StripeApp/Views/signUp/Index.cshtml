@@ -1,0 +1,251 @@
+﻿@model StripeApp.Models.stripeModel
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <h2>sign up</h2>
+
+    @if (Model.IntentSecretis == null)
+    {
+
+
+        <div class="main-content">
+            <div class="container">
+
+                <div class="row">
+
+
+                    <div class="col-md-12">
+                        <div id="payment-form-container" class="col-md-6 well" style="background-color:#fff !important;">
+
+                            @using (Html.BeginForm("Index", "signUp", FormMethod.Post, new { id = "stripeForm", @class = "cardInfo", accept_charset = "UTF-8", novalidate = "", autocomplete = "on" }))
+                            {
+                                @Html.AntiForgeryToken()
+
+                                <div class="row">
+
+                                    <div id="card-element">
+                                        <!-- A Stripe Element will be inserted here. -->
+                                    </div>
+                                    <div id="card-errors" role="alert"></div>
+
+                                </div>
+
+                                <div class="form-group">
+                                    
+                                        <input id="fullName" type="text" name="fullName" value="@Model.fullName" class="input-lg form-control " placeholder="Full Name" required>
+
+                                </div>
+
+                                <div class="form-group">
+                                    
+                                        <input id="email" type="email" name="stripeEmail" value="@Model.StripeEmail" class="input-lg form-control email" placeholder="Email" required>
+
+                                </div>
+
+                                @Html.HiddenFor(m => m.StripePublishableKey)
+                                
+                                <div class="row">
+                                    <div class="form-group col-md-6  ">
+                                        <button type="submit"  id="card-button" class="btn btn-success  btn-product"><span class="glyphicon glyphicon-shopping-cart"></span> Subscribe</button>
+                                    </div>
+                                </div>
+
+                            }
+
+                        </div>
+
+
+
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        @Scripts.Render("~/bundles/jquery")
+        @Scripts.Render("~/bundles/bootstrap")
+        <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
+        <script type="text/javascript">
+
+            var stripe = Stripe('@Model.StripePublishableKey');
+            var cardButton = document.getElementById('card-button');
+            var clientSecret = cardButton.dataset.secret;
+            $(function () {
+                var elements = stripe.elements();
+                var style = {
+                    base: {
+                        color: 'black',
+                    },
+                    invalid: {
+                        color: 'red',
+                    }
+                };
+                var card = elements.create('card', { style: style });
+                // Add an instance of the card Element into the `card-element` <div>.
+                card.mount('#card-element');
+                // Handle real-time validation errors from the card Element.
+                card.addEventListener('change', function (event) {
+                    var displayError = document.getElementById('card-errors');
+                    if (event.error) {
+                        displayError.textContent = event.error.message;
+                    } else {
+                        displayError.textContent = '';
+                    }
+                });
+                var form = document.getElementById('stripeForm');
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    stripe.createToken(card).then(function (result) {
+                        if (result.error) {
+                            // Inform the user if there was an error.
+                            var errorElement = document.getElementById('card-errors');
+                            errorElement.textContent = result.error.message;
+                        } else {
+                            // Send the token to the server.
+                            stripeTokenHandler(result.token);
+                        }
+                    });
+                });
+                // Submit the form with the token ID.
+                function stripeTokenHandler(token) {
+                    // Insert the token ID into the form so it gets submitted to the server
+                    var form = document.getElementById('stripeForm');
+                    var hiddenInput = document.createElement('input');
+                    hiddenInput.setAttribute('type', 'hidden');
+                    hiddenInput.setAttribute('name', 'stripeToken');
+                    hiddenInput.setAttribute('value', token.id);
+                    form.appendChild(hiddenInput);
+                    // Submit the form
+                    form.submit();
+                }
+            });
+
+
+        </script>
+    }
+
+    @if (Model.IntentSecretis != null)
+    {
+
+
+        <div class="main-content">
+            <div class="container">
+
+                <div class="row">
+
+
+                    <div class="col-md-12">
+                        <div id="payment-form-container" class="col-md-6 well" style="background-color:#fff !important;">
+
+                            @using (Html.BeginForm("Index", "signUp", FormMethod.Post, new { id = "stripeForm", @class = "cardInfo", accept_charset = "UTF-8", novalidate = "", autocomplete = "on" }))
+                            {
+                                @Html.AntiForgeryToken()
+
+                                <div class="row">
+
+                                    <div id="card-element">
+                                        <!-- A Stripe Element will be inserted here. -->
+                                    </div>
+                                    <div id="card-errors" role="alert"></div>
+
+                                </div>
+
+                                <div class="form-group">
+                                        <input id="fullName" type="text" name="fullName" value="@Model.fullName" class="input-lg form-control " placeholder="Full Name" required>
+
+                                </div>
+
+                                <div class="form-group">
+                                    
+                                        <input id="email" type="email" name="stripeEmail" value="@Model.StripeEmail" class="input-lg form-control email" placeholder="Email" required>
+
+                                </div>
+
+                                @Html.HiddenFor(m => m.StripePublishableKey)
+                                
+                                <div class="row">
+                                    <div class="form-group col-md-6  ">
+                                        <button type="submit" data-secret="@Model.IntentSecretis" id="card-button" class="btn btn-success  btn-product"><span class="glyphicon glyphicon-shopping-cart"></span> Subscribe</button>
+                                    </div>
+                                </div>
+
+                            }
+
+                        </div>
+
+
+
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        @Scripts.Render("~/bundles/jquery")
+        @Scripts.Render("~/bundles/bootstrap")
+        <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
+        <script type="text/javascript">
+
+            var stripe = Stripe('@Model.StripePublishableKey');
+            var cardButton = document.getElementById('card-button');
+            var clientSecret = cardButton.dataset.secret;
+            $(function() {
+                // Create an instance of Elements.
+                var elements = stripe.elements();
+                // Custom styling can be passed to options when creating an Element.
+                var style = {
+                    base: {
+                        color: 'black',
+                    },
+                    invalid: {
+                        color: 'red',
+                    }
+                };
+                // Create an instance of the card Element.
+                var cardElement = elements.create('card', { style: style });
+                // Add an instance of the card Element into the `card-element` <div>.
+                cardElement.mount('#card-element');
+                // Handle real-time validation errors from the card Element.
+                cardElement.addEventListener('change',
+                    function(event) {
+                        var displayError = document.getElementById('card-errors');
+                        if (event.error) {
+                            displayError.textContent = event.error.message;
+                        } else {
+                            displayError.textContent = '';
+                        }
+                    });
+                var form = document.getElementById('stripeForm');
+                form.addEventListener('submit',
+                    function(event) {
+                        event.preventDefault();
+                        stripe.handleCardPayment(clientSecret, cardElement).then(function(result) {
+                            if (result.error) {
+                                alert("Payment Failed" + " " + result.message);
+                            } else {
+                                alert("Payment is successfull.");
+                            }
+                        });
+                    });
+            });
+
+
+        </script>
+    }
+</body>
+</html>
